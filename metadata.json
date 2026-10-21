@@ -1,0 +1,6 @@
+{
+  "name": "Tienda Miriam - Sistema POS y ERP",
+  "description": "Sistema de Punto de Venta y ERP personalizado para restaurante y tienda con inventario de 5 niveles, arqueo de caja, gestión de mesas y fiados.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

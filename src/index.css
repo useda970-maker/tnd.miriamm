@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  :root {
+    --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+/* Senior Accessibility Mode enhancements */
+.senior-mode {
+  font-size: 110%;
+}
+
+.senior-mode button {
+  min-height: 48px;
+  font-weight: 600;
+}
+
+.senior-mode input,
+.senior-mode select,
+.senior-mode textarea {
+  min-height: 46px;
+  font-size: 1.05rem;
+}
+
+/* Print styling for receipts and cash closing vouchers */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}
