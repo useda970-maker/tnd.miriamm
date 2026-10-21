@@ -17,8 +17,12 @@ import {
   Lock,
   Unlock,
   Keyboard,
+  Building2,
+  UserCheck,
+  KeyRound,
 } from 'lucide-react';
 import { ShortcutsConfigModal } from './shortcuts/ShortcutsConfigModal';
+import { UserRole } from '../types';
 
 export type ActiveTab =
   | 'pos'
@@ -27,7 +31,8 @@ export type ActiveTab =
   | 'caja'
   | 'fiados'
   | 'auditoria'
-  | 'reportes';
+  | 'reportes'
+  | 'panel-dueno';
 
 interface HeaderProps {
   activeTab: ActiveTab;
@@ -46,12 +51,24 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     outbox,
     syncOutboxNow,
     currentUser,
+    currentUserRole,
+    switchUserRole,
     shortcuts,
   } = useStore();
 
   const [isShortcutsOpen, setIsShortcutsOpen] = React.useState<boolean>(false);
+  const [isRoleModalOpen, setIsRoleModalOpen] = React.useState<boolean>(false);
+  const [enteredPin, setEnteredPin] = React.useState<string>('');
+  const [pinError, setPinError] = React.useState<string>('');
 
-  const navItems: { id: ActiveTab; label: string; icon: React.ElementType; description: string; shortcutKey?: string }[] = [
+  const navItems: {
+    id: ActiveTab;
+    label: string;
+    icon: React.ElementType;
+    description: string;
+    shortcutKey?: string;
+    badge?: string;
+  }[] = [
     { id: 'pos', label: 'Ventas (POS)', icon: ShoppingBag, description: 'Cobro rápido, catálogo y pedidos', shortcutKey: shortcuts.GOTO_POS },
     { id: 'mesas', label: 'Mesas', icon: LayoutGrid, description: 'Plano del restaurante y comandas', shortcutKey: shortcuts.GOTO_TABLES },
     { id: 'inventario', label: 'Inventario', icon: Boxes, description: 'Insumos, recetas y producción' },
@@ -59,6 +76,7 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
     { id: 'fiados', label: 'Clientes y Fiados', icon: Users, description: 'Deudores y cobro de abonos' },
     { id: 'auditoria', label: 'Auditoría', icon: ShieldCheck, description: 'Registro intocable de cambios' },
     { id: 'reportes', label: 'Reportes', icon: BarChart3, description: 'Ganancia bruta y flujo neto' },
+    { id: 'panel-dueno', label: 'Panel Dueño', icon: Building2, description: 'Control empresarial, escandallo y recetas', badge: 'PRO' },
   ];
 
   return (
@@ -217,13 +235,47 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
               </kbd>
             </button>
 
+            {/* User Role Switcher Button */}
+            <button
+              onClick={() => {
+                setEnteredPin('');
+                setPinError('');
+                setIsRoleModalOpen(true);
+              }}
+              title="Cambiar Perfil de Usuario (Dueño vs Cajero)"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition shadow-xs cursor-pointer ${
+                currentUserRole === 'DUEÑO'
+                  ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20'
+                  : 'bg-amber-500/10 border-amber-500/40 text-amber-700 dark:text-amber-300 hover:bg-amber-500/20'
+              }`}
+            >
+              <UserCheck className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline font-mono">
+                {currentUserRole === 'DUEÑO' ? 'Doña Miriam' : 'Cajero'}
+              </span>
+              <span
+                className={`text-[10px] px-1 py-0.2 rounded font-black ${
+                  currentUserRole === 'DUEÑO'
+                    ? 'bg-emerald-600 text-white'
+                    : 'bg-amber-500 text-slate-900'
+                }`}
+              >
+                {currentUserRole}
+              </span>
+            </button>
+
             {/* Dark Mode Toggle */}
             <button
               onClick={toggleDarkMode}
               title={darkMode ? 'Cambiar a Modo Claro' : 'Cambiar a Modo Oscuro'}
-              className="p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors cursor-pointer text-xs font-bold shadow-xs"
             >
-              {darkMode ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              {darkMode ? (
+                <Sun className="w-3.5 h-3.5 text-amber-400" />
+              ) : (
+                <Moon className="w-3.5 h-3.5 text-slate-700" />
+              )}
+              <span className="hidden sm:inline">{darkMode ? 'Modo Claro' : 'Modo Oscuro'}</span>
             </button>
           </div>
         </div>
@@ -255,6 +307,125 @@ export const Header: React.FC<HeaderProps> = ({ activeTab, setActiveTab }) => {
       {isShortcutsOpen && (
         <ShortcutsConfigModal onClose={() => setIsShortcutsOpen(false)} />
       )}
+
+      {/* Modal de Cambio de Rol / Autenticación */}
+      {isRoleModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl w-full max-w-sm p-6 shadow-2xl">
+            <div className="text-center mb-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 flex items-center justify-center mx-auto mb-2">
+                <KeyRound className="w-6 h-6" />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                Control de Acceso y Roles
+              </h3>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Seleccione el perfil de sesión activa para el sistema:
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3">
+              <button
+                onClick={() => {
+                  switchUserRole('CAJERO');
+                  setIsRoleModalOpen(false);
+                  if (activeTab === 'panel-dueno') {
+                    setActiveTab('pos');
+                  }
+                }}
+                className={`p-3 rounded-xl border text-left flex items-center justify-between cursor-pointer transition ${
+                  currentUserRole === 'CAJERO'
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-950/30'
+                    : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'
+                }`}
+              >
+                <div>
+                  <div className="text-xs font-bold text-slate-900 dark:text-white">
+                    CAJERO (Operador POS)
+                  </div>
+                  <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                    Cobros, ventas en espera, arqueo. Sin acceso a catálogo o recetas.
+                  </div>
+                </div>
+                {currentUserRole === 'CAJERO' && (
+                  <span className="text-xs font-bold text-amber-600 dark:text-amber-400">Activo</span>
+                )}
+              </button>
+
+              <div
+                className={`p-3 rounded-xl border transition ${
+                  currentUserRole === 'DUEÑO'
+                    ? 'border-emerald-500 bg-emerald-50 dark:bg-emerald-950/30'
+                    : 'border-slate-200 dark:border-slate-700'
+                }`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <div>
+                    <div className="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+                      <span>DUEÑO (ADMINISTRADOR)</span>
+                      <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-600 text-white font-black">
+                        PRO
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 dark:text-slate-400">
+                      Acceso total, panel web, recetas, escandallo y auditoría.
+                    </div>
+                  </div>
+                  {currentUserRole === 'DUEÑO' && (
+                    <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400">Activo</span>
+                  )}
+                </div>
+
+                {currentUserRole !== 'DUEÑO' && (
+                  <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+                    <label className="text-[11px] font-semibold text-slate-700 dark:text-slate-300">
+                      Ingrese PIN de Seguridad (Predeterminado: 1234):
+                    </label>
+                    <input
+                      type="password"
+                      maxLength={6}
+                      value={enteredPin}
+                      onChange={e => {
+                        setEnteredPin(e.target.value);
+                        setPinError('');
+                      }}
+                      placeholder="PIN Dueño"
+                      className="px-3 py-1.5 bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded-lg text-xs font-mono text-center tracking-widest text-slate-900 dark:text-white focus:outline-hidden focus:border-emerald-500"
+                    />
+                    {pinError && (
+                      <p className="text-[11px] text-rose-500 font-semibold">{pinError}</p>
+                    )}
+                    <button
+                      onClick={() => {
+                        const res = switchUserRole('DUEÑO', enteredPin);
+                        if (res.success) {
+                          setIsRoleModalOpen(false);
+                          setActiveTab('panel-dueno');
+                        } else {
+                          setPinError(res.message);
+                        }
+                      }}
+                      className="w-full py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition shadow-xs cursor-pointer"
+                    >
+                      Autenticar como Dueño
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+              <button
+                onClick={() => setIsRoleModalOpen(false)}
+                className="px-3 py-1.5 text-xs text-slate-500 hover:text-slate-900 dark:hover:text-white font-semibold cursor-pointer"
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
+

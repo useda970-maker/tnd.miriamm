@@ -1,0 +1,130 @@
+@model TiendaMiriam.WebDashboard.Models.ProductEditViewModel
+@{
+    var isEdit = !string.IsNullOrEmpty(Model.Id);
+    ViewData["Title"] = isEdit ? "Editar Producto" : "Nuevo Producto / Insumo";
+}
+
+<div class="max-w-3xl mx-auto w-full">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl">
+        <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-800">
+            <div>
+                <h1 class="text-xl font-extrabold text-white">@(isEdit ? "Editar Producto / Insumo" : "Crear Nuevo Producto / Insumo")</h1>
+                <p class="text-xs text-slate-400 mt-0.5">Control de unidades libres, restricción de venta y doble rol</p>
+            </div>
+            <a asp-action="Index" class="text-xs text-slate-400 hover:text-white">← Volver al Catálogo</a>
+        </div>
+
+        <form asp-action="Save" method="post" class="flex flex-col gap-5">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Código de Producto</label>
+                    <input asp-for="Code" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Nombre Completo</label>
+                    <input asp-for="Name" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Categoría</label>
+                    <select asp-for="Category" asp-items="Html.GetEnumSelectList<TiendaMiriam.Core.Enums.ProductCategory>()" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white"></select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Unidad de Medida Base (Libre)</label>
+                    <select asp-for="Unit" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white">
+                        <option value="un">Unidad (un)</option>
+                        <option value="kg">Kilogramos (kg)</option>
+                        <option value="g">Gramos (g)</option>
+                        <option value="lb">Libras (lb)</option>
+                        <option value="oz">Onzas (oz)</option>
+                        <option value="L">Litros (L)</option>
+                        <option value="ml">Mililitros (ml)</option>
+                        <option value="caja">Caja</option>
+                        <option value="paquete">Paquete</option>
+                        <option value="blister">Blíster</option>
+                        <option value="porcion">Porción</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Costo de Producción / Compra (Bs.)</label>
+                    <input asp-for="CostPrice" type="number" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Precio de Venta al Público (Bs.)</label>
+                    <input asp-for="Price" type="number" step="0.01" min="0" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-emerald-400 font-bold font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Stock Actual</label>
+                    <input asp-for="Stock" type="number" step="0.01" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white font-mono" />
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-300 mb-1">Alerta Stock Mínimo</label>
+                    <input asp-for="MinStockAlert" type="number" step="1" required class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-xl text-xs text-white font-mono" />
+                </div>
+            </div>
+
+            <!-- RESTRICTION FLAG -->
+            <div class="p-4 rounded-2xl bg-slate-800/80 border border-slate-700 flex items-start gap-3">
+                <input asp-for="ShowInPOS" type="checkbox" id="chkShowInPos" class="w-4 h-4 mt-1 text-emerald-600 rounded" />
+                <label for="chkShowInPos" class="text-xs text-slate-300 cursor-pointer">
+                    <strong class="text-white block">¿Permitir venta directa al público en el POS?</strong>
+                    <span class="text-slate-400 block mt-0.5">
+                        Si está en <strong>SÍ</strong>, aparece en el catálogo del POS para cobro directo.
+                        Si está en <strong>NO</strong>, actúa exclusivamente como Insumo o Materia Prima interna oculta de la caja para evitar errores de cobro.
+                    </span>
+                </label>
+            </div>
+
+            <!-- Double-role Multifunction -->
+            <div class="p-3.5 rounded-2xl bg-slate-800/50 border border-slate-700/60 flex items-center gap-3">
+                <input asp-for="CanBeUsedAsIngredient" type="checkbox" id="chkIngredient" class="w-4 h-4 text-emerald-600 rounded" />
+                <label for="chkIngredient" class="text-xs text-slate-300 cursor-pointer">
+                    <strong class="text-white">Producto Multifunción (Doble Rol):</strong> Puede consumirse como insumo en recetas de cocina/repostería.
+                </label>
+            </div>
+
+            <!-- Frozen Batch Traceability -->
+            <div class="p-4 rounded-2xl bg-purple-950/20 border border-purple-800/40 flex flex-col gap-3">
+                <span class="text-xs font-bold text-purple-300">Trazabilidad de Congelados & Pesaje</span>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Número de Lote</label>
+                        <input asp-for="BatchNumber" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white font-mono" />
+                    </div>
+                    <div>
+                        <label class="text-[11px] text-slate-400 block mb-1">Fecha de Caducidad</label>
+                        <input asp-for="ExpirationDate" type="date" class="w-full px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-xs text-white" />
+                    </div>
+                    <div class="flex items-center gap-2 pt-5">
+                        <input asp-for="IsSoldByWeight" type="checkbox" id="chkWeight" class="w-4 h-4 text-purple-600 rounded" />
+                        <label for="chkWeight" class="text-xs text-purple-200">Vendido por Peso (kg / lb)</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mandatory Forensic Audit Reason -->
+            <div>
+                <label class="block text-xs font-bold text-amber-400 mb-1">
+                    Motivo / Justificación para Auditoría Forense (Obligatorio)
+                </label>
+                <input asp-for="AuditReason" required placeholder="Ej. Ajuste de tarifa de proveedor, actualización de escandallo..." class="w-full px-3 py-2 bg-slate-800 border border-amber-500/40 rounded-xl text-xs text-white focus:outline-hidden focus:border-amber-500" />
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+                <a asp-action="Index" class="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800 hover:bg-slate-700">Cancelar</a>
+                <button type="submit" class="px-6 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg">
+                    Guardar Producto
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

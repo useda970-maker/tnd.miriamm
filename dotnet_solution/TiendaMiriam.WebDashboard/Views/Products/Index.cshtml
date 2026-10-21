@@ -1,0 +1,119 @@
+@model IEnumerable<TiendaMiriam.Core.Entities.Product>
+@{
+    ViewData["Title"] = "Catálogo Maestro de Productos";
+}
+
+<div class="flex flex-wrap items-center justify-between gap-4">
+    <div>
+        <h1 class="text-2xl font-black text-white">Catálogo Maestro & Recetas</h1>
+        <p class="text-xs text-slate-400">Administre insumos, productos de reventa, escandallo libre y visibilidad en caja.</p>
+    </div>
+    <a asp-action="Create" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shadow-lg transition">
+        + Nuevo Producto / Insumo
+    </a>
+</div>
+
+<!-- Table Container -->
+<div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-lg">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+            <thead class="bg-slate-800/80 text-slate-300 uppercase tracking-wider font-semibold border-b border-slate-700">
+                <tr>
+                    <th class="py-3 px-4">Código / Nombre</th>
+                    <th class="py-3 px-4">Categoría</th>
+                    <th class="py-3 px-4">Unidad Base</th>
+                    <th class="py-3 px-4">Stock</th>
+                    <th class="py-3 px-4">Costo Producción</th>
+                    <th class="py-3 px-4">Precio Venta</th>
+                    <th class="py-3 px-4 text-center">¿Venta Directa POS?</th>
+                    <th class="py-3 px-4 text-right">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+                @foreach (var p in Model)
+                {
+                    var isPrepared = p.Category == TiendaMiriam.Core.Enums.ProductCategory.PREPARADO;
+                    var margin = p.Price > 0 ? ((p.Price - p.CostPrice) / p.Price) * 100 : 0;
+
+                    <tr class="hover:bg-slate-800/40 transition">
+                        <td class="py-3 px-4">
+                            <div class="font-bold text-white flex items-center gap-2">
+                                <span>@p.Name</span>
+                                @if (p.Presentations?.Any() == true)
+                                {
+                                    <span class="px-1.5 py-0.2 rounded text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                                        @p.Presentations.Count presentaciones
+                                    </span>
+                                }
+                            </div>
+                            <div class="text-[11px] text-slate-400 font-mono">@p.Code</div>
+                        </td>
+                        <td class="py-3 px-4">
+                            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 border border-slate-700">
+                                @p.Category
+                            </span>
+                        </td>
+                        <td class="py-3 px-4 font-mono font-medium text-slate-300">@p.Unit</td>
+                        <td class="py-3 px-4 font-mono">
+                            @if (isPrepared)
+                            {
+                                <span class="text-cyan-400 font-semibold">Virtual (Receta)</span>
+                            }
+                            else if (p.Stock < 0)
+                            {
+                                <span class="text-rose-400 font-bold bg-rose-500/20 px-2 py-0.5 rounded border border-rose-500/30">
+                                    @p.Stock @p.Unit (Déficit)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="@(p.Stock <= p.MinStockAlert ? "text-amber-400 font-bold" : "text-slate-200")">
+                                    @p.Stock @p.Unit
+                                </span>
+                            }
+                        </td>
+                        <td class="py-3 px-4 font-mono text-slate-300">Bs. @p.CostPrice.ToString("F2")</td>
+                        <td class="py-3 px-4 font-mono">
+                            @if (p.Price > 0)
+                            {
+                                <span class="font-bold text-emerald-400">Bs. @p.Price.ToString("F2")</span>
+                                <span class="text-[10px] text-slate-400 ml-1">(@margin.ToString("F0")%)</span>
+                            }
+                            else
+                            {
+                                <span class="text-slate-500 italic">No para venta</span>
+                            }
+                        </td>
+                        <td class="py-3 px-4 text-center">
+                            @if (p.ShowInPOS)
+                            {
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                    ✓ Sí (En Caja)
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-400 border border-slate-700" title="Oculto en caja, insumo interno">
+                                    ✗ No (Insumo Cocina)
+                                </span>
+                            }
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <div class="flex items-center justify-end gap-1.5">
+                                @if (isPrepared || p.Category == TiendaMiriam.Core.Enums.ProductCategory.CONGELADO_LOTE)
+                                {
+                                    <a asp-controller="Recipes" asp-action="Edit" asp-route-productId="@p.Id" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition">
+                                        👨‍🍳 Receta
+                                    </a>
+                                }
+                                <a asp-action="Edit" asp-route-id="@p.Id" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[11px] font-semibold transition">
+                                    Editar
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

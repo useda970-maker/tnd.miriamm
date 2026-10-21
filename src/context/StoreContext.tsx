@@ -20,6 +20,9 @@ import {
   InventoryWaste,
   BusinessConfig,
   RecipeIngredient,
+  UserRole,
+  SystemUser,
+  ProductPresentation,
 } from '../types';
 import { DEFAULT_KEYBOARD_SHORTCUTS } from '../data/shortcuts';
 import {
@@ -37,7 +40,9 @@ import {
   INITIAL_SUPPLIER_PURCHASES,
   INITIAL_INVENTORY_WASTES,
   INITIAL_BUSINESS_CONFIG,
+  INITIAL_USERS,
 } from '../data/initialData';
+import { convertUnit, calculateIngredientCost } from '../utils/unitConversion';
 
 interface StoreContextType {
   products: Product[];
@@ -58,8 +63,14 @@ interface StoreContextType {
   seniorMode: boolean;
   darkMode: boolean;
   currentUser: string;
+  currentUserRole: UserRole;
+  currentUserObj: SystemUser;
+  users: SystemUser[];
   isOnline: boolean;
   shortcuts: KeyboardShortcutsMap;
+
+  // Role Authentication Action
+  switchUserRole: (role: UserRole, pin?: string) => { success: boolean; message: string };
 
   // Actions
   toggleSeniorMode: () => void;
@@ -88,15 +99,20 @@ interface StoreContextType {
   resumeHoldOrder: (orderId: string) => HoldOrder | undefined;
   deleteHoldOrder: (orderId: string) => void;
 
-  // Inventory, Escandallo & Recipes
+  // Inventory, Escandallo & Recipes (Airontium style)
   calculateVirtualStock: (product: Product) => number;
   produceBatch: (productId: string, unitsToProduce: number) => { success: boolean; message: string };
   unpackPackage: (packageProductId: string) => { success: boolean; message: string };
   updateProductStockManual: (productId: string, newStock: number, reason: string) => void;
   updateProductPrice: (productId: string, newPrice: number, reason: string) => void;
-  updateProductRecipe: (productId: string, recipe: RecipeIngredient[]) => void;
+  updateProductRecipe: (productId: string, recipe: RecipeIngredient[], updatedCostPrice?: number) => void;
   registerInventoryWaste: (productId: string, quantity: number, reason: string) => void;
   toggleShowInPOS: (productId: string) => void;
+
+  // Product CRUD (Owner Enterprise Management)
+  createProduct: (productData: Omit<Product, 'id'>, reason?: string) => Product;
+  updateProduct: (product: Product, reason: string) => void;
+  deleteProduct: (productId: string, reason: string) => { success: boolean; message: string };
 
   // Tables
   saveOrderToTable: (tableId: string, items: CartItem[], notes?: string) => void;
@@ -210,9 +226,25 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem(`${STORAGE_PREFIX}seniorMode`);
     return saved ? JSON.parse(saved) : true; // Default to true for ease of use!
   });
-  const [darkMode, setDarkMode] = useState<boolean>(false);
+  const [darkMode, setDarkMode] = useState<boolean>(() => {
+    const saved = localStorage.getItem(`${STORAGE_PREFIX}darkMode`);
+    return saved ? JSON.parse(saved) : false;
+  });
   const [isOnline, setIsOnline] = useState<boolean>(true);
-  const [currentUser] = useState<string>('Miriam Suárez');
+
+  // User and Role Security (CAJERO vs DUEÑO)
+  const [users] = useState<SystemUser[]>(() => {
+    const saved = localStorage.getItem(`${STORAGE_PREFIX}users`);
+    return saved ? JSON.parse(saved) : INITIAL_USERS;
+  });
+
+  const [currentUserRole, setCurrentUserRole] = useState<UserRole>(() => {
+    const saved = localStorage.getItem(`${STORAGE_PREFIX}userRole`);
+    return (saved as UserRole) || 'DUEÑO';
+  });
+
+  const currentUserObj = users.find(u => u.role === currentUserRole) || users[0];
+  const currentUser = currentUserObj.name;
 
   const [shortcuts, setShortcuts] = useState<KeyboardShortcutsMap>(() => {
     const saved = localStorage.getItem(`${STORAGE_PREFIX}shortcuts`);
@@ -283,6 +315,15 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.setItem(`${STORAGE_PREFIX}seniorMode`, JSON.stringify(seniorMode));
   }, [seniorMode]);
 
+  useEffect(() => {
+    localStorage.setItem(`${STORAGE_PREFIX}darkMode`, JSON.stringify(darkMode));
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [darkMode]);
+
   const toggleSeniorMode = () => setSeniorMode(prev => !prev);
   const toggleDarkMode = () => setDarkMode(prev => !prev);
   const toggleOnlineStatus = () => setIsOnline(prev => !prev);
@@ -345,7 +386,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setOutbox(prev => [...prev, outboxItem]);
   };
 
-  // Virtual stock calculation for Prepared Products based on ingredient availability
+  // Virtual stock calculation for Prepared Products based on ingredient availability (Airontium free units)
   const calculateVirtualStock = (product: Product): number => {
     if (product.category !== 'PREPARADO' || !product.recipe || product.recipe.length === 0) {
       return product.stock;
@@ -357,12 +398,16 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!ingProd) continue;
 
       const availableStock = ingProd.stock;
-      const servingsFromIngredient = Math.floor(availableStock / ingredient.quantity);
+      // Convert required recipe quantity (in ingredient.unit) into stock unit of the raw ingredient (ingProd.unit)
+      const convertedQuantity = convertUnit(ingredient.quantity, ingredient.unit, ingProd.unit);
+      if (convertedQuantity <= 0) continue;
+
+      const servingsFromIngredient = Math.floor(availableStock / convertedQuantity);
       if (servingsFromIngredient < minServings) {
         minServings = servingsFromIngredient;
       }
     }
-    return minServings === Infinity ? 0 : minServings;
+    return minServings === Infinity ? 0 : Math.max(0, minServings);
   };
 
   // Complete Sale (POS)
@@ -395,23 +440,36 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         if (prodIndex === -1) continue;
         const prod = updated[prodIndex];
 
+        // Presentation multiplier (e.g. Caja de 24 -> multiplier 24, or Single -> multiplier 1)
+        const multiplier = item.presentationId
+          ? prod.presentations?.find(p => p.id === item.presentationId)?.multiplier || 1
+          : 1;
+
         if (prod.category === 'PREPARADO' && prod.recipe) {
-          // Direct recipe: discounts raw inputs or intermediate frozen products!
+          // Direct recipe: discounts raw inputs or intermediate frozen products converting units
           for (const ing of prod.recipe) {
             const ingIndex = updated.findIndex(p => p.id === ing.productId);
             if (ingIndex !== -1) {
-              const needed = ing.quantity * item.quantity;
+              const ingProd = updated[ingIndex];
+              const totalNeededInRecipeUnit = ing.quantity * item.quantity * multiplier;
+              const convertedNeededInStockUnit = convertUnit(
+                totalNeededInRecipeUnit,
+                ing.unit,
+                ingProd.unit
+              );
+
               updated[ingIndex] = {
-                ...updated[ingIndex],
-                stock: parseFloat((updated[ingIndex].stock - needed).toFixed(3)),
+                ...ingProd,
+                stock: parseFloat((ingProd.stock - convertedNeededInStockUnit).toFixed(4)),
               };
             }
           }
         } else if (prod.category === 'CONGELADO_LOTE' || prod.category === 'ARTICULO_TIENDA') {
           // Direct stock discount - allows negative stock (-1, -2, -3...) so high-volume sales are never interrupted
+          const totalUnitsToDeduct = item.quantity * multiplier;
           updated[prodIndex] = {
             ...prod,
-            stock: prod.stock - item.quantity,
+            stock: parseFloat((prod.stock - totalUnitsToDeduct).toFixed(3)),
           };
         }
       }
@@ -1099,8 +1157,34 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     );
   };
 
-  // Recipe Escandallo Editor
-  const updateProductRecipe = (productId: string, recipe: RecipeIngredient[]) => {
+  // Role Authentication Action
+  const switchUserRole = (targetRole: UserRole, pin?: string): { success: boolean; message: string } => {
+    if (targetRole === 'DUEÑO') {
+      const ownerUser = users.find(u => u.role === 'DUEÑO');
+      const requiredPin = ownerUser?.pin || '1234';
+      if (pin !== requiredPin) {
+        return { success: false, message: 'PIN de Administrador/Dueño incorrecto. Acceso restringido.' };
+      }
+    }
+    setCurrentUserRole(targetRole);
+    localStorage.setItem(`${STORAGE_PREFIX}userRole`, targetRole);
+    addAuditLog(
+      'STOCK_AJUSTADO',
+      'Control de Acceso',
+      `Cambio de sesión a perfil: ${targetRole} (${targetRole === 'DUEÑO' ? 'Acceso Total al Panel Web Empresarial' : 'Operador POS Restringido'})`
+    );
+    return {
+      success: true,
+      message: `Sesión iniciada como ${targetRole === 'DUEÑO' ? 'Miriam Suárez (Dueña)' : 'Cajero de Turno'}.`,
+    };
+  };
+
+  // Recipe Escandallo Editor (Airontium free units)
+  const updateProductRecipe = (
+    productId: string,
+    recipe: RecipeIngredient[],
+    updatedCostPrice?: number
+  ) => {
     const prod = products.find(p => p.id === productId);
     if (!prod) return;
 
@@ -1108,9 +1192,12 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     for (const ing of recipe) {
       const ingProd = products.find(p => p.id === ing.productId);
       if (ingProd) {
-        computedCost += ingProd.costPrice * ing.quantity;
+        computedCost += calculateIngredientCost(ingProd.unit, ingProd.costPrice, ing.quantity, ing.unit);
       }
     }
+
+    const finalCost =
+      updatedCostPrice !== undefined ? updatedCostPrice : parseFloat(computedCost.toFixed(2));
 
     setProducts(prev =>
       prev.map(p =>
@@ -1118,7 +1205,7 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           ? {
               ...p,
               recipe,
-              costPrice: parseFloat(computedCost.toFixed(2)),
+              costPrice: finalCost,
             }
           : p
       )
@@ -1127,11 +1214,76 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     addAuditLog(
       'RECETA_MODIFICADA',
       prod.name,
-      `Escandallo/receta actualizada para ${prod.name}. Nuevo costo unitario calculado: Bs. ${computedCost.toFixed(2)}.`,
+      `Escandallo/receta modificada para ${prod.name}. Ingredientes: ${recipe.length}. Nuevo costo unitario calculado: Bs. ${finalCost.toFixed(2)}.`,
       `Bs. ${prod.costPrice.toFixed(2)}`,
-      `Bs. ${computedCost.toFixed(2)}`,
-      'Ajuste técnico de escandallo'
+      `Bs. ${finalCost.toFixed(2)}`,
+      'Ajuste técnico de escandallo por el Dueño'
     );
+  };
+
+  // Product CRUD (Owner Enterprise Management)
+  const createProduct = (productData: Omit<Product, 'id'>, reason?: string): Product => {
+    const newId = `prod-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+    const newProd: Product = {
+      ...productData,
+      id: newId,
+    };
+
+    setProducts(prev => [newProd, ...prev]);
+
+    addAuditLog(
+      'STOCK_AJUSTADO',
+      newProd.name,
+      `Producto/Insumo nuevo creado en sistema. Código: ${newProd.code}, Categoría: ${newProd.category}, Precio: Bs. ${newProd.price.toFixed(2)}, Costo: Bs. ${newProd.costPrice.toFixed(2)}, Unidad: ${newProd.unit}, POS: ${newProd.showInPOS ? 'Visible' : 'Oculto a cajero'}.`,
+      '-',
+      `${newProd.stock} ${newProd.unit}`,
+      reason || 'Alta de producto por el Dueño'
+    );
+
+    return newProd;
+  };
+
+  const updateProduct = (updatedProduct: Product, reason: string) => {
+    const prev = products.find(p => p.id === updatedProduct.id);
+    if (!prev) return;
+
+    setProducts(prevProducts =>
+      prevProducts.map(p => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+
+    addAuditLog(
+      'PRECIO_MODIFICADO',
+      updatedProduct.name,
+      `Actualización integral de producto: Precio Bs. ${prev.price.toFixed(2)} -> Bs. ${updatedProduct.price.toFixed(2)}, Costo Bs. ${prev.costPrice.toFixed(2)} -> Bs. ${updatedProduct.costPrice.toFixed(2)}, Visibilidad POS: ${updatedProduct.showInPOS ? 'Visible' : 'Oculto'}, Unidad: ${updatedProduct.unit}.`,
+      `Bs. ${prev.price.toFixed(2)}`,
+      `Bs. ${updatedProduct.price.toFixed(2)}`,
+      reason || 'Modificación administrativa del Dueño'
+    );
+  };
+
+  const deleteProduct = (productId: string, reason: string): { success: boolean; message: string } => {
+    const target = products.find(p => p.id === productId);
+    if (!target) return { success: false, message: 'Producto no encontrado.' };
+
+    const isUsedInRecipe = products.some(p => p.recipe?.some(r => r.productId === productId));
+    if (isUsedInRecipe) {
+      return {
+        success: false,
+        message: `No se puede eliminar "${target.name}" porque forma parte de la receta de otros productos preparados. Modifique las recetas primero.`,
+      };
+    }
+
+    setProducts(prev => prev.filter(p => p.id !== productId));
+    addAuditLog(
+      'STOCK_AJUSTADO',
+      target.name,
+      `Producto eliminado del catálogo. Stock final retirado: ${target.stock} ${target.unit}.`,
+      `Stock: ${target.stock}`,
+      'ELIMINADO',
+      reason || 'Baja de producto por Dueño'
+    );
+
+    return { success: true, message: `Producto "${target.name}" eliminado correctamente.` };
   };
 
   // Business Config
@@ -1316,6 +1468,10 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         seniorMode,
         darkMode,
         currentUser,
+        currentUserRole,
+        currentUserObj,
+        users,
+        switchUserRole,
         isOnline,
         shortcuts,
         toggleSeniorMode,
@@ -1337,6 +1493,9 @@ export const StoreProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         updateProductRecipe,
         registerInventoryWaste,
         toggleShowInPOS,
+        createProduct,
+        updateProduct,
+        deleteProduct,
         saveOrderToTable,
         markTableForPayment,
         clearTable,

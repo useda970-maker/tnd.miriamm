@@ -17,6 +17,7 @@ import {
   X,
   History,
 } from 'lucide-react';
+import { RecetaEditor } from '../dashboard/RecetaEditor';
 
 export const InventoryView: React.FC = () => {
   const {
@@ -34,6 +35,7 @@ export const InventoryView: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState<string>('');
 
   // Modals state
+  const [editingRecipeProduct, setEditingRecipeProduct] = useState<Product | null>(null);
   const [producingProduct, setProducingProduct] = useState<Product | null>(null);
   const [batchQuantity, setBatchQuantity] = useState<number>(10);
   const [unpackingProduct, setUnpackingProduct] = useState<Product | null>(null);
@@ -95,15 +97,15 @@ export const InventoryView: React.FC = () => {
   const getCategoryBadge = (cat: ProductCategory) => {
     switch (cat) {
       case 'INSUMO_CRUDO':
-        return { label: 'Insumo Crudo (Mayorista)', color: 'bg-amber-100 text-amber-900 border-amber-300' };
+        return { label: 'Insumo Crudo (Mayorista)', color: 'bg-amber-100 dark:bg-amber-950/70 text-amber-900 dark:text-amber-200 border-amber-300 dark:border-amber-800' };
       case 'PREPARADO':
-        return { label: 'Preparado (Receta Directa)', color: 'bg-rose-100 text-rose-900 border-rose-300' };
+        return { label: 'Preparado (Receta Directa)', color: 'bg-rose-100 dark:bg-rose-950/70 text-rose-900 dark:text-rose-200 border-rose-300 dark:border-rose-800' };
       case 'CONGELADO_LOTE':
-        return { label: 'Congelado (Por Lote)', color: 'bg-purple-100 text-purple-900 border-purple-300' };
+        return { label: 'Congelado (Por Lote)', color: 'bg-purple-100 dark:bg-purple-950/70 text-purple-900 dark:text-purple-200 border-purple-300 dark:border-purple-800' };
       case 'ARTICULO_TIENDA':
-        return { label: 'Artículo Tienda (Reventa)', color: 'bg-blue-100 text-blue-900 border-blue-300' };
+        return { label: 'Artículo Tienda (Reventa)', color: 'bg-blue-100 dark:bg-blue-950/70 text-blue-900 dark:text-blue-200 border-blue-300 dark:border-blue-800' };
       case 'SERVICIO':
-        return { label: 'Servicio (Sin Stock)', color: 'bg-slate-100 text-slate-800 border-slate-300' };
+        return { label: 'Servicio (Sin Stock)', color: 'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 border-slate-300 dark:border-slate-700' };
     }
   };
 
@@ -138,7 +140,7 @@ export const InventoryView: React.FC = () => {
               placeholder="Buscar por nombre o código..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold focus:ring-2 focus:ring-emerald-500"
+              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500"
             />
           </div>
 
@@ -450,7 +452,7 @@ export const InventoryView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setProducingProduct(null)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -477,7 +479,7 @@ export const InventoryView: React.FC = () => {
                 </h3>
                 <button
                   onClick={() => setUnpackingProduct(null)}
-                  className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer"
+                  className="p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -497,7 +499,7 @@ export const InventoryView: React.FC = () => {
                   <span>Se agregarán al inventario individual:</span>
                   <span>+{unpackingProduct.unpackUnitsYield} unidades</span>
                 </div>
-                <div className="text-[11px] text-slate-500 pt-1 border-t border-blue-200">
+                <div className="text-[11px] text-slate-500 dark:text-slate-400 pt-1 border-t border-blue-200 dark:border-blue-800">
                   Producto destino: {products.find(p => p.id === unpackingProduct.unpackTargetId)?.name}
                 </div>
               </div>
@@ -506,7 +508,7 @@ export const InventoryView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setUnpackingProduct(null)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -530,7 +532,7 @@ export const InventoryView: React.FC = () => {
                 <AlertTriangle className="w-5 h-5 text-amber-500" />
                 <span>Ajuste Manual de Inventario (Auditado)</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Producto:{' '}
                 <strong className="text-slate-800 dark:text-slate-200">
                   {editingStockProduct.name}
@@ -547,7 +549,7 @@ export const InventoryView: React.FC = () => {
                   step="0.1"
                   value={newStockValue}
                   onChange={e => setNewStockValue(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-base bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-base bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -561,7 +563,7 @@ export const InventoryView: React.FC = () => {
                   placeholder="Ej: Conteo físico fin de semana, merma por rotura..."
                   value={stockReason}
                   onChange={e => setStockReason(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -569,7 +571,7 @@ export const InventoryView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setEditingStockProduct(null)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -577,7 +579,7 @@ export const InventoryView: React.FC = () => {
                   type="button"
                   disabled={!stockReason.trim()}
                   onClick={handleStockSubmit}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Guardar y Registrar en Auditoría
                 </button>
@@ -594,7 +596,7 @@ export const InventoryView: React.FC = () => {
                 <Edit2 className="w-5 h-5 text-emerald-600" />
                 <span>Modificar Precio de Venta (Auditado)</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Producto:{' '}
                 <strong className="text-slate-800 dark:text-slate-200">
                   {editingPriceProduct.name}
@@ -611,7 +613,7 @@ export const InventoryView: React.FC = () => {
                   step="0.5"
                   value={newPriceValue}
                   onChange={e => setNewPriceValue(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-base bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-base bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -625,7 +627,7 @@ export const InventoryView: React.FC = () => {
                   placeholder="Ej: Aumento de costo de proveedor, promoción..."
                   value={priceReason}
                   onChange={e => setPriceReason(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -633,7 +635,7 @@ export const InventoryView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setEditingPriceProduct(null)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -641,9 +643,9 @@ export const InventoryView: React.FC = () => {
                   type="button"
                   disabled={!priceReason.trim()}
                   onClick={handlePriceSubmit}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white disabled:opacity-50 cursor-pointer shadow-xs"
                 >
-                  Guardar y Registrar en Auditoría
+                  Guardar Nuevo Precio
                 </button>
               </div>
             </div>

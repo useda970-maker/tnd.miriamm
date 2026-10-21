@@ -5,18 +5,38 @@ export type ProductCategory =
   | 'ARTICULO_TIENDA'
   | 'SERVICIO';
 
+export type UserRole = 'DUEÑO' | 'CAJERO';
+
+export interface SystemUser {
+  id: string;
+  name: string;
+  role: UserRole;
+  pin: string;
+  email?: string;
+}
+
+export type UnitType = 'MASA' | 'VOLUMEN' | 'DISCRETO';
+
+export interface UnitDefinition {
+  code: string;
+  name: string;
+  type: UnitType;
+  baseFactor: number; // in grams (mass), ml (vol), or 1 (discrete)
+}
+
 export interface RecipeIngredient {
   productId: string;
   productName: string;
-  quantity: number; // e.g. 0.25 (kg) or 1 (unit)
+  quantity: number; // e.g. 150 (g), 1 (un), 0.5 (kg), 10 (ml)
   unit: string;
 }
 
 export interface ProductPresentation {
   id: string;
-  name: string; // e.g. "Unidad", "Por Mayor (Docena)", "Porción Grande"
+  name: string; // e.g. "Unidad", "Caja 24u", "Paquete 6u", "Por Mayor (Docena)", "Porción Grande"
   multiplier: number;
   price: number;
+  barcode?: string;
 }
 
 export interface Product {
@@ -27,16 +47,22 @@ export interface Product {
   price: number; // Selling price in Bs.
   costPrice: number; // Purchase/production cost in Bs.
   stock: number; // Real stock for Insumo, Congelado, Tienda. Virtual calculation for Preparado.
-  unit: 'un' | 'kg' | 'L' | 'paquete' | 'porción';
-  showInPOS: boolean; // Controls if cashier sees it in POS
-  canBeUsedAsIngredient: boolean; // Double-role capability (e.g. Coca-Cola)
+  unit: string; // Free unit: 'kg' | 'g' | 'lb' | 'oz' | 'L' | 'ml' | 'un' | 'caja' | 'paquete' | 'blíster' | 'porción'
+  showInPOS: boolean; // Controls if cashier sees it in POS (Restricción de venta directa)
+  canBeUsedAsIngredient: boolean; // Double-role capability (e.g. Insumo / Producto directo)
   imageUrl?: string;
   colorTag?: string; // For rapid visual recognition
-  recipe?: RecipeIngredient[]; // For Preparados or Congelados
+  recipe?: RecipeIngredient[]; // For Preparados or Congelados (Escandallo)
   unpackTargetId?: string; // For package breakdown (e.g. 6-pack -> individual)
   unpackUnitsYield?: number; // How many units are yielded
   minStockAlert?: number;
   presentations?: ProductPresentation[];
+  // Frozen and batch traceability
+  batchNumber?: string;
+  expirationDate?: string;
+  isSoldByWeight?: boolean;
+  weightKg?: number;
+  barcode?: string;
 }
 
 export interface CartItem {

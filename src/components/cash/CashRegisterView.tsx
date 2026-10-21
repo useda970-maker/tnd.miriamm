@@ -344,14 +344,14 @@ export const CashRegisterView: React.FC = () => {
                     min="0"
                     value={initialFundInput}
                     onChange={e => setInitialFundInput(parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border rounded-lg font-bold text-xl bg-white dark:bg-slate-800"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                   {[100, 200, 300].map(val => (
                     <button
                       key={val}
                       type="button"
                       onClick={() => setInitialFundInput(val)}
-                      className="px-3 py-2 text-xs font-bold border rounded-lg bg-slate-50 dark:bg-slate-800 cursor-pointer"
+                      className="px-3 py-2 text-xs font-bold border border-slate-300 dark:border-slate-700 rounded-lg bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                     >
                       {val}
                     </button>
@@ -363,7 +363,7 @@ export const CashRegisterView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsOpenSessionModal(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -467,7 +467,7 @@ export const CashRegisterView: React.FC = () => {
                               [denom]: parseInt(e.target.value) || 0,
                             })
                           }
-                          className="w-full mt-1 px-2 py-1 text-center font-bold font-mono border rounded bg-white dark:bg-slate-900"
+                          className="w-full mt-1 px-2 py-1 text-center font-bold font-mono border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                         />
                         <span className="text-[11px] text-slate-400 block mt-1">
                           = Bs. {((billCounts[denom] || 0) * denom).toFixed(0)}
@@ -502,7 +502,7 @@ export const CashRegisterView: React.FC = () => {
                               [denom]: parseInt(e.target.value) || 0,
                             })
                           }
-                          className="w-full mt-1 px-2 py-1 text-center font-bold font-mono border rounded bg-white dark:bg-slate-900"
+                          className="w-full mt-1 px-2 py-1 text-center font-bold font-mono border border-slate-300 dark:border-slate-700 rounded bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                         />
                         <span className="text-[11px] text-slate-400 block mt-1">
                           = Bs. {((coinCounts[denom] || 0) * denom).toFixed(1)}
@@ -522,23 +522,23 @@ export const CashRegisterView: React.FC = () => {
                     value={closureNotes}
                     onChange={e => setClosureNotes(e.target.value)}
                     placeholder="Ej: Turno de mediodía concluido sin novedades..."
-                    className="w-full px-3 py-2 text-xs border rounded-lg bg-white dark:bg-slate-800"
+                    className="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                   />
                 </div>
               </div>
 
-              <div className="p-4 bg-slate-100 dark:bg-slate-800 flex justify-end gap-2 border-t">
+              <div className="p-4 bg-slate-100 dark:bg-slate-800 flex justify-end gap-2 border-t border-slate-200 dark:border-slate-700">
                 <button
                   type="button"
                   onClick={() => setIsCloseSessionModal(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   type="button"
                   onClick={handleCloseSubmit}
-                  className="px-5 py-2 text-xs font-bold rounded-lg bg-slate-900 text-white hover:bg-slate-800 cursor-pointer shadow-xs"
+                  className="px-5 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs"
                 >
                   Confirmar Cierre de Caja
                 </button>
@@ -569,7 +569,7 @@ export const CashRegisterView: React.FC = () => {
                   placeholder="Ej: 5 kg de cebolla, ajíes y limones del mercado"
                   value={gpDesc}
                   onChange={e => setGpDesc(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -583,7 +583,7 @@ export const CashRegisterView: React.FC = () => {
                   min="0.5"
                   value={gpAmount || ''}
                   onChange={e => setGpAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-lg bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -596,7 +596,7 @@ export const CashRegisterView: React.FC = () => {
                   placeholder="Ej: Nota de venta manual #102"
                   value={gpReceipt}
                   onChange={e => setGpReceipt(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -604,7 +604,7 @@ export const CashRegisterView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsGenericPurchaseModal(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -612,7 +612,7 @@ export const CashRegisterView: React.FC = () => {
                   type="button"
                   disabled={!gpDesc.trim() || gpAmount <= 0}
                   onClick={handleGenericPurchaseSubmit}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-rose-600 hover:bg-rose-700 text-white disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Registrar Salida de Dinero
                 </button>
@@ -629,7 +629,7 @@ export const CashRegisterView: React.FC = () => {
                 <MinusCircle className="w-5 h-5 text-amber-600" />
                 <span>Gasto Menor de Caja</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 Salida de efectivo autorizada por la administración para insumos de emergencia o
                 limpieza.
               </p>
@@ -644,7 +644,7 @@ export const CashRegisterView: React.FC = () => {
                   placeholder="Ej: Bolsa de hielo en cubos, fósforos, jabón líquido..."
                   value={expConcept}
                   onChange={e => setExpConcept(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg text-xs bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg text-xs bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -658,7 +658,7 @@ export const CashRegisterView: React.FC = () => {
                   min="0.5"
                   value={expAmount || ''}
                   onChange={e => setExpAmount(parseFloat(e.target.value) || 0)}
-                  className="w-full px-3 py-2 border rounded-lg font-bold text-lg bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                 />
               </div>
 
@@ -666,7 +666,7 @@ export const CashRegisterView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsExpenseModal(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -674,7 +674,7 @@ export const CashRegisterView: React.FC = () => {
                   type="button"
                   disabled={!expConcept.trim() || expAmount <= 0}
                   onClick={handleExpenseSubmit}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 hover:bg-amber-700 text-white disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Registrar Gasto
                 </button>

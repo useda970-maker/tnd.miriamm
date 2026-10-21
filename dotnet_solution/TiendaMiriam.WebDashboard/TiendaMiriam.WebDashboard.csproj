@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>TiendaMiriam.WebDashboard</RootNamespace>
+    <AssemblyName>TiendaMiriam.WebDashboard</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Cookies" Version="2.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TiendaMiriam.Core\TiendaMiriam.Core.csproj" />
+    <ProjectReference Include="..\TiendaMiriam.Infrastructure\TiendaMiriam.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

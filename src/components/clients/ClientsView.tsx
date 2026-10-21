@@ -104,7 +104,7 @@ export const ClientsView: React.FC = () => {
               placeholder="Buscar cliente por nombre o teléfono..."
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold"
+              className="w-full pl-9 pr-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl text-xs font-semibold text-slate-900 dark:text-white placeholder:text-slate-400 focus:ring-2 focus:ring-emerald-500"
             />
           </div>
         </div>
@@ -304,12 +304,12 @@ export const ClientsView: React.FC = () => {
                     max={selectedClient.currentDebt}
                     value={abonoAmount || ''}
                     onChange={e => setAbonoAmount(parseFloat(e.target.value) || 0)}
-                    className="w-full px-3 py-2 border rounded-lg font-bold text-xl bg-white dark:bg-slate-800"
+                    className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg font-bold text-xl bg-white dark:bg-slate-800 text-slate-900 dark:text-white"
                   />
                   <button
                     type="button"
                     onClick={() => setAbonoAmount(selectedClient.currentDebt)}
-                    className="px-3 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white whitespace-nowrap cursor-pointer"
+                    className="px-3 py-2 text-xs font-bold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white whitespace-nowrap cursor-pointer shadow-xs"
                   >
                     Total
                   </button>
@@ -324,10 +324,10 @@ export const ClientsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAbonoMethod('EFECTIVO')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer ${
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-colors ${
                       abonoMethod === 'EFECTIVO'
                         ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 ring-2 ring-emerald-500'
-                        : 'border-slate-200 text-slate-600'
+                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     Efectivo en Caja
@@ -335,10 +335,10 @@ export const ClientsView: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => setAbonoMethod('QR')}
-                    className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer ${
+                    className={`p-2.5 rounded-xl border text-xs font-bold text-center cursor-pointer transition-colors ${
                       abonoMethod === 'QR'
                         ? 'border-emerald-600 bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-200 ring-2 ring-emerald-500'
-                        : 'border-slate-200 text-slate-600'
+                        : 'border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                     }`}
                   >
                     Transferencia / QR
@@ -360,7 +360,7 @@ export const ClientsView: React.FC = () => {
                   placeholder="Ej: Pago entregado por su hijo en ventanilla..."
                   value={abonoNotes}
                   onChange={e => setAbonoNotes(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border rounded-lg bg-white dark:bg-slate-800"
+                  className="w-full px-3 py-2 text-xs border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400"
                 />
               </div>
 
@@ -368,7 +368,7 @@ export const ClientsView: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => setIsAbonoModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
@@ -376,7 +376,7 @@ export const ClientsView: React.FC = () => {
                   type="button"
                   disabled={abonoAmount <= 0}
                   onClick={handleAbonoSubmit}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 cursor-pointer shadow-xs"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Confirmar Cobro de Abono
                 </button>

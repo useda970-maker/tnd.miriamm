@@ -99,7 +99,7 @@ export const HoldOrdersModal: React.FC<HoldOrdersModalProps> = ({
         </div>
 
         {/* Tab switchers */}
-        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 px-6 pt-3 gap-2">
+        <div className="flex border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 px-6 pt-3 gap-2">
           {currentCart.length > 0 && (
             <button
               onClick={() => setActiveTab('SAVE_CURRENT')}

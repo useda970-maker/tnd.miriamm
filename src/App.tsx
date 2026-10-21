@@ -8,6 +8,7 @@ import { CashRegisterView } from './components/cash/CashRegisterView';
 import { ClientsView } from './components/clients/ClientsView';
 import { AuditView } from './components/audit/AuditView';
 import { ReportsView } from './components/reports/ReportsView';
+import { OwnerDashboardView } from './components/dashboard/OwnerDashboardView';
 import { CartItem } from './types';
 import { getNormalizedKeyString } from './data/shortcuts';
 
@@ -123,6 +124,7 @@ const MainLayout: React.FC = () => {
         {activeTab === 'fiados' && <ClientsView />}
         {activeTab === 'auditoria' && <AuditView />}
         {activeTab === 'reportes' && <ReportsView />}
+        {activeTab === 'panel-dueno' && <OwnerDashboardView />}
       </main>
     </div>
   );

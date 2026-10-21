@@ -349,7 +349,7 @@ export const TablesView: React.FC<TablesViewProps> = ({ onOpenTableInPOS }) => {
                 <select
                   value={transferTargetId}
                   onChange={e => setTransferTargetId(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 font-bold text-sm"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm"
                 >
                   <option value="">-- Seleccione mesa libre --</option>
                   {tables
@@ -365,14 +365,14 @@ export const TablesView: React.FC<TablesViewProps> = ({ onOpenTableInPOS }) => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setIsTransferModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   disabled={!transferTargetId}
                   onClick={handleTransfer}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Confirmar Traslado
                 </button>
@@ -389,9 +389,9 @@ export const TablesView: React.FC<TablesViewProps> = ({ onOpenTableInPOS }) => {
                 <Merge className="w-5 h-5 text-amber-600" />
                 <span>Combinar Mesas (Grupos que se juntan)</span>
               </h3>
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-slate-500 dark:text-slate-400">
                 La comanda de la mesa seleccionada abajo se unirá con la comanda de{' '}
-                <span className="font-bold">{selectedTable.name}</span>.
+                <span className="font-bold text-slate-800 dark:text-slate-200">{selectedTable.name}</span>.
               </p>
 
               <div>
@@ -401,7 +401,7 @@ export const TablesView: React.FC<TablesViewProps> = ({ onOpenTableInPOS }) => {
                 <select
                   value={combineTargetId}
                   onChange={e => setCombineTargetId(e.target.value)}
-                  className="w-full px-3 py-2 border rounded-lg bg-white dark:bg-slate-800 font-bold text-sm"
+                  className="w-full px-3 py-2 border border-slate-300 dark:border-slate-700 rounded-lg bg-white dark:bg-slate-800 text-slate-900 dark:text-white font-bold text-sm"
                 >
                   <option value="">-- Seleccione mesa --</option>
                   {tables
@@ -418,14 +418,14 @@ export const TablesView: React.FC<TablesViewProps> = ({ onOpenTableInPOS }) => {
               <div className="flex justify-end gap-2 pt-2">
                 <button
                   onClick={() => setIsCombineModalOpen(false)}
-                  className="px-4 py-2 text-xs font-bold rounded-lg border cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer"
                 >
                   Cancelar
                 </button>
                 <button
                   disabled={!combineTargetId}
                   onClick={handleCombine}
-                  className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer"
+                  className="px-4 py-2 text-xs font-bold rounded-lg bg-amber-600 text-white hover:bg-amber-700 disabled:opacity-50 cursor-pointer shadow-xs"
                 >
                   Unificar Comandas
                 </button>

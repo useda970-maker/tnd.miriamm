@@ -13,6 +13,7 @@ import {
   SupplierPurchase,
   InventoryWaste,
   BusinessConfig,
+  SystemUser,
 } from '../types';
 
 export const INITIAL_PRODUCTS: Product[] = [
@@ -225,16 +226,63 @@ export const INITIAL_PRODUCTS: Product[] = [
   {
     id: 'store-oreo',
     code: 'TND-003',
-    name: 'Galletas Oreo Original 108g',
+    name: 'Galletas Oreo Original (Multiformato)',
     category: 'ARTICULO_TIENDA',
     price: 5.5,
-    costPrice: 3.8,
-    stock: 35,
+    costPrice: 3.5,
+    stock: 48,
     unit: 'un',
     showInPOS: true,
-    canBeUsedAsIngredient: false,
+    canBeUsedAsIngredient: true, // Multifunción: Se vende directa o como insumo para repostería/malteadas
     colorTag: '#2563EB',
     minStockAlert: 10,
+    presentations: [
+      { id: 'pres-oreo-1', name: 'Unidad Suelta (108g)', multiplier: 1, price: 5.5 },
+      { id: 'pres-oreo-24', name: 'Caja Display x24 Unidades', multiplier: 24, price: 118.0 },
+      { id: 'pres-oreo-6', name: 'Paquete x4 Unidades', multiplier: 4, price: 20.0 },
+    ],
+  },
+  {
+    id: 'frz-pavo-entero',
+    code: 'FRZ-003',
+    name: 'Pavo Entero Horneable Congelado',
+    category: 'CONGELADO_LOTE',
+    price: 45.0, // Precio por kilogramo en Bs.
+    costPrice: 28.0,
+    stock: 35.8, // Stock en kg
+    unit: 'kg',
+    showInPOS: true,
+    canBeUsedAsIngredient: true,
+    colorTag: '#7C3AED',
+    minStockAlert: 10,
+    batchNumber: 'LOTE-PAVO-2026-X11',
+    expirationDate: '2026-12-31',
+    isSoldByWeight: true,
+    presentations: [
+      { id: 'pres-pavo-kg', name: 'Por Peso (1 kg)', multiplier: 1, price: 45.0 },
+      { id: 'pres-pavo-pieza', name: 'Pieza Entera Mediana (~4.5 kg)', multiplier: 4.5, price: 195.0 },
+    ],
+  },
+  {
+    id: 'prep-malteada-oreo',
+    code: 'PREP-004',
+    name: 'Malteada Artesanal de Oreo',
+    category: 'PREPARADO',
+    price: 15.0,
+    costPrice: 5.8,
+    stock: 0, // Virtual
+    unit: 'porción',
+    showInPOS: true,
+    canBeUsedAsIngredient: false,
+    colorTag: '#475569',
+    presentations: [
+      { id: 'pres-malt-1', name: 'Vaso Estándar (350ml)', multiplier: 1, price: 15.0 },
+      { id: 'pres-malt-2', name: 'Vaso Gigante (500ml)', multiplier: 1.5, price: 22.0 },
+    ],
+    recipe: [
+      { productId: 'store-oreo', productName: 'Galletas Oreo Original', quantity: 2, unit: 'un' },
+      { productId: 'raw-aceite', productName: 'Leche Entera (Insumo)', quantity: 0.25, unit: 'L' },
+    ],
   },
   {
     id: 'store-lays',
@@ -745,4 +793,22 @@ export const INITIAL_INVENTORY_WASTES: InventoryWaste[] = [
     registeredBy: 'Miriam Suárez',
   },
 ];
+
+export const INITIAL_USERS: SystemUser[] = [
+  {
+    id: 'usr-owner',
+    name: 'Miriam Suárez (Dueña)',
+    role: 'DUEÑO',
+    pin: '1234',
+    email: 'miriam@tiendamiriam.bo',
+  },
+  {
+    id: 'usr-cashier',
+    name: 'Cajero Turno Mañana',
+    role: 'CAJERO',
+    pin: '0000',
+    email: 'cajero@tiendamiriam.bo',
+  },
+];
+
 

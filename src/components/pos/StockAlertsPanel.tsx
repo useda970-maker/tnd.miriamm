@@ -159,7 +159,7 @@ export const StockAlertsPanel: React.FC<StockAlertsPanelProps> = ({
           </div>
 
           {/* Filter tabs */}
-          <div className="flex p-2 gap-1 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-850 text-xs font-bold">
+          <div className="flex p-2 gap-1 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800 text-xs font-bold">
             <button
               onClick={() => setFilterType('ALL')}
               className={`flex-1 py-1.5 px-2 rounded-lg transition-colors cursor-pointer text-center ${

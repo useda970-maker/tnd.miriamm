@@ -519,7 +519,7 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     Parte 1: Efectivo
                   </span>
                   <div>
-                    <label className="text-xs text-slate-500">Monto fijado:</label>
+                    <label className="text-xs text-slate-500 dark:text-slate-400">Monto fijado:</label>
                     <input
                       type="number"
                       step="1"
@@ -527,36 +527,36 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                       min={0}
                       value={mixedCashAmount}
                       onChange={e => setMixedCashAmount(parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded font-bold text-right font-mono"
+                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg font-bold text-right font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     />
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500">Efectivo recibido:</label>
+                    <label className="text-xs text-slate-500 dark:text-slate-400">Efectivo recibido:</label>
                     <input
                       type="number"
                       step="1"
                       min={mixedCashAmount}
                       value={mixedCashReceived}
                       onChange={e => setMixedCashReceived(parseFloat(e.target.value) || 0)}
-                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded font-bold text-right font-mono"
+                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg font-bold text-right font-mono bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     />
                   </div>
-                  <div className="text-xs font-bold text-emerald-700">
+                  <div className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
                     Cambio: Bs. {mixedChange.toFixed(2)}
                   </div>
                 </div>
 
                 {/* Part 2: Secondary Method */}
                 <div className="p-3 bg-white dark:bg-slate-900 rounded-lg border border-slate-200 dark:border-slate-700 space-y-2">
-                  <span className="text-xs font-bold uppercase text-blue-700">
+                  <span className="text-xs font-bold uppercase text-blue-700 dark:text-blue-400">
                     Parte 2: Segundo Método
                   </span>
                   <div>
-                    <label className="text-xs text-slate-500">Método restante:</label>
+                    <label className="text-xs text-slate-500 dark:text-slate-400">Método restante:</label>
                     <select
                       value={mixedSecondaryMethod}
                       onChange={e => setMixedSecondaryMethod(e.target.value as any)}
-                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded font-semibold text-xs"
+                      className="w-full px-3 py-1.5 border border-slate-300 dark:border-slate-600 rounded-lg font-semibold text-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-white"
                     >
                       <option value="QR">Código QR</option>
                       <option value="FIADO">Fiado a Cliente</option>
@@ -564,18 +564,18 @@ export const PaymentModal: React.FC<PaymentModalProps> = ({
                     </select>
                   </div>
                   <div>
-                    <label className="text-xs text-slate-500">Monto restante a cubrir:</label>
+                    <label className="text-xs text-slate-500 dark:text-slate-400">Monto restante a cubrir:</label>
                     <div className="text-lg font-bold font-mono text-slate-800 dark:text-slate-100">
                       Bs. {mixedSecondaryAmount.toFixed(2)}
                     </div>
                   </div>
                   {(mixedSecondaryMethod === 'FIADO' || mixedSecondaryMethod === 'MONEDERO') && (
                     <div>
-                      <label className="text-xs text-slate-500 block mb-1">Cliente titular:</label>
+                      <label className="text-xs text-slate-500 dark:text-slate-400 block mb-1">Cliente titular:</label>
                       <select
                         value={selectedClientId}
                         onChange={e => setSelectedClientId(e.target.value)}
-                        className="w-full px-2 py-1 text-xs border border-slate-300 dark:border-slate-600 rounded bg-white dark:bg-slate-900 font-medium"
+                        className="w-full px-2 py-1.5 text-xs border border-slate-300 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-900 text-slate-900 dark:text-white font-medium"
                       >
                         {clients.map(c => (
                           <option key={c.id} value={c.id}>
